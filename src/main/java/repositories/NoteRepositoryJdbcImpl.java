@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class NoteRepositoryJdbcImpl implements NoteRepository {
@@ -18,10 +19,13 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
     private static final String SQL_INSERT = "insert into note(title, date, text) values (?, ? , ?)";
 
     //language=SQL
-    private static final String SQL_UPDATE = "update note set title = ?, text = ?";
+    private static final String SQL_UPDATE = "update note set title = ?, text = ? where id = ?";
 
     //language=SQL
     private static final String SQL_DELETE = "delete from note where id = ?";
+
+    //language=SQL
+    private static final String SQL_SELECT_BY_ID = "select * from note where id = ?";
 
     //language=SQL
     private static final String SQL_SELECT_BY_DATE = "select * from note where date = ?";
@@ -81,11 +85,12 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
             PreparedStatement statement = connection.prepareStatement(SQL_UPDATE)) {
             statement.setString(1, note.getTitle());
             statement.setString(2, note.getText());
+            statement.setLong(3, note.getId());
             int affectedRow = statement.executeUpdate();
 
-//            if (affectedRow != 1) {
-//                throw new SQLException("Can`t update note");
-//            }
+            if (affectedRow != 1) {
+                throw new SQLException("Can`t update note");
+            }
         } catch (SQLException e) {
             throw new IllegalArgumentException(e);
         }
@@ -102,6 +107,24 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
             throw new IllegalArgumentException(e);
         }
 
+    }
+
+    @Override
+    public Optional<Note> findById(Long id) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_ID)) {
+            statement.setLong(1, id);
+
+            try(ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(productMapper.apply(resultSet));
+                }
+                return Optional.empty();
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Override
@@ -141,5 +164,7 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
         } catch (SQLException e) {
             throw new IllegalArgumentException(e);
         }
+
+
     }
 }

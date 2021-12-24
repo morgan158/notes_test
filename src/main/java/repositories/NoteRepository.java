@@ -4,6 +4,7 @@ import models.Note;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface NoteRepository {
 
@@ -13,4 +14,5 @@ public interface NoteRepository {
     List<Note> findBySubstring(String substring);
     void delete(Long id);
 
+    Optional<Note> findById(Long id);
 }

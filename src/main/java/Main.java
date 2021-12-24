@@ -7,6 +7,7 @@ import repositories.NoteRepositoryJdbcImpl;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,7 +38,13 @@ public class Main {
 
 //        noteRepository.save(note);
 //
-//        note.setText("Обновленный текст заметки");
+        Optional<Note> productOptional = noteRepository.findById(2L);
+        productOptional.ifPresent(note -> {
+            note.setText("Какой-то очень интересный текст");
+            noteRepository.update(note);
+            System.out.println(note);
+        });
+
 //
 //        noteRepository.update(note);
 
