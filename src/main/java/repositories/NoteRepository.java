@@ -11,6 +11,6 @@ public interface NoteRepository {
     void update(Note note);
     List<Note> findByDate(LocalDate dateCreate);
     List<Note> findBySubstring(String substring);
-    void delete(Note note);
+    void delete(Long id);
 
 }

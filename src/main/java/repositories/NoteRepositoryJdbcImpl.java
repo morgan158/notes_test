@@ -27,7 +27,7 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
     private static final String SQL_SELECT_BY_DATE = "select * from note where date = ?";
 
     //language=SQL
-    private static final String SQL_SELECT_BY_SUBSTRING = "select * from note where text like ? or title like ?";
+    private static final String SQL_SELECT_BY_SUBSTRING = "select * from note where title like ? or text like ?";
 
     private final DataSource dataSource;
 
@@ -83,9 +83,9 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
             statement.setString(2, note.getText());
             int affectedRow = statement.executeUpdate();
 
-            if (affectedRow != 1) {
-                throw new SQLException("Can`t update note");
-            }
+//            if (affectedRow != 1) {
+//                throw new SQLException("Can`t update note");
+//            }
         } catch (SQLException e) {
             throw new IllegalArgumentException(e);
         }
@@ -93,10 +93,10 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
     }
 
     @Override
-    public void delete(Note note) {
+    public void delete(Long id) {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQL_DELETE)) {
-            statement.setLong(1, note.getId());
+            statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new IllegalArgumentException(e);
@@ -129,8 +129,8 @@ public class NoteRepositoryJdbcImpl implements NoteRepository {
         List<Note> notes = new ArrayList<>();
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQL_SELECT_BY_SUBSTRING)) {
-            statement.setString(1, substring);
-            statement.setString(2, substring);
+            statement.setString(1, "%" + substring + "%");
+            statement.setString(2, "%" + substring + "%");
             try(ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     notes.add(productMapper.apply(resultSet));
